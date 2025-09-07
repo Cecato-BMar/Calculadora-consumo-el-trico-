@@ -24,7 +24,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             text-align: center;
             margin-bottom: 2rem;
@@ -48,13 +47,6 @@
             color: #6b7280;
         }
 
-        .icon {
-            width: 2rem;
-            height: 2rem;
-            color: #2563eb;
-        }
-
-        /* Cards */
         .card {
             background: white;
             border-radius: 0.75rem;
@@ -66,25 +58,15 @@
         .grid {
             display: grid;
             gap: 2rem;
-        }
-
-        .grid-2 {
             grid-template-columns: repeat(2, 1fr);
         }
 
         @media (max-width: 1024px) {
-            .grid-lg-2 {
+            .grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        @media (max-width: 768px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Form */
         .form-header {
             display: flex;
             align-items: center;
@@ -136,13 +118,13 @@
             background-color: #f3f4f6;
             color: #374151;
             text-align: left;
+            border: 1px solid #d1d5db;
         }
 
         .btn-small:hover {
             background-color: #e5e7eb;
         }
 
-        /* Inputs */
         .form-group {
             margin-bottom: 1rem;
         }
@@ -170,7 +152,6 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        /* Special sections */
         .energy-rate {
             background-color: #fefce8;
             padding: 1rem;
@@ -191,7 +172,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Common appliances grid */
         .common-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -199,18 +179,10 @@
             margin-bottom: 1rem;
         }
 
-        /* Appliances list */
         .empty-state {
             text-align: center;
             padding: 3rem 0;
             color: #6b7280;
-        }
-
-        .empty-icon {
-            width: 4rem;
-            height: 4rem;
-            margin: 0 auto 1rem;
-            opacity: 0.5;
         }
 
         .appliances-container {
@@ -253,22 +225,19 @@
             background: none;
             border: none;
             cursor: pointer;
+            border-radius: 0.25rem;
+        }
+
+        .btn-icon:hover {
+            background-color: #f3f4f6;
         }
 
         .btn-edit {
             color: #2563eb;
         }
 
-        .btn-edit:hover {
-            color: #1d4ed8;
-        }
-
         .btn-delete {
             color: #dc2626;
-        }
-
-        .btn-delete:hover {
-            color: #b91c1c;
         }
 
         .appliance-details {
@@ -308,7 +277,6 @@
             color: #059669;
         }
 
-        /* Totals */
         .totals {
             border-top: 1px solid #e5e7eb;
             padding-top: 1.5rem;
@@ -373,7 +341,6 @@
             color: #a16207;
         }
 
-        /* How to use section */
         .howto-steps {
             display: flex;
             flex-direction: column;
@@ -427,7 +394,6 @@
             color: #1e40af;
         }
 
-        /* Tips section */
         .tips-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -445,17 +411,6 @@
             flex: 1;
         }
 
-        /* Icons */
-        .icon-sm {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .icon-md {
-            width: 1.25rem;
-            height: 1.25rem;
-        }
-
         .section-title {
             font-size: 1.125rem;
             font-weight: 600;
@@ -465,6 +420,21 @@
             align-items: center;
             gap: 0.5rem;
         }
+
+        @media (max-width: 768px) {
+            .appliance-details {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .totals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .common-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -472,7 +442,7 @@
         <!-- Header -->
         <header class="header">
             <div class="header-title">
-                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style="width: 2rem; height: 2rem; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
                 <h1>Calculadora de Consumo Elétrico</h1>
@@ -482,18 +452,15 @@
             </p>
         </header>
 
-        <div class="grid grid-lg-2">
+        <div class="grid">
             <!-- Formulário -->
             <div class="card">
                 <div class="form-header">
                     <h2 class="form-title" id="form-title">
                         Adicionar Aparelho
                     </h2>
-                    <button id="add-btn" class="btn btn-primary">
-                        <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Adicionar
+                    <button class="btn btn-primary" onclick="toggleForm()">
+                        <span id="btn-text">Adicionar</span>
                     </button>
                 </div>
 
@@ -502,46 +469,51 @@
                     <label class="label">
                         Tarifa de Energia Elétrica (R$/kWh)
                     </label>
-                    <input type="number" step="0.01" id="electricity-rate" value="0.75" class="input" />
+                    <input type="number" step="0.01" id="electricity-rate" value="0.75" class="input" onchange="updateTotals()" />
                 </div>
 
                 <!-- Formulário -->
-                <div id="appliance-form" class="hidden fade-in">
+                <div id="appliance-form" class="hidden">
                     <!-- Aparelhos comuns -->
                     <div class="form-group">
                         <label class="label">
                             Aparelhos Comuns (clique para usar)
                         </label>
-                        <div class="common-grid" id="common-appliances">
-                            <!-- Preenchido dinamicamente -->
+                        <div class="common-grid">
+                            <button type="button" onclick="selectAppliance('Geladeira', 350)" class="btn btn-small">Geladeira (350W)</button>
+                            <button type="button" onclick="selectAppliance('Ar Condicionado', 1500)" class="btn btn-small">Ar Condicionado (1500W)</button>
+                            <button type="button" onclick="selectAppliance('Chuveiro Elétrico', 5500)" class="btn btn-small">Chuveiro Elétrico (5500W)</button>
+                            <button type="button" onclick="selectAppliance('Micro-ondas', 1200)" class="btn btn-small">Micro-ondas (1200W)</button>
+                            <button type="button" onclick="selectAppliance('Televisão LED 40', 150)" class="btn btn-small">TV LED 40" (150W)</button>
+                            <button type="button" onclick="selectAppliance('Máquina de Lavar', 500)" class="btn btn-small">Máquina de Lavar (500W)</button>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="label">Nome do Aparelho</label>
-                        <input type="text" id="appliance-name" class="input" placeholder="Ex: Geladeira" required />
+                        <input type="text" id="appliance-name" class="input" placeholder="Ex: Geladeira" />
                     </div>
 
                     <div class="form-group">
                         <label class="label">Potência (Watts)</label>
-                        <input type="number" id="appliance-power" class="input" placeholder="Ex: 350" required />
+                        <input type="number" id="appliance-power" class="input" placeholder="Ex: 350" />
                     </div>
 
                     <div class="form-group">
                         <label class="label">Horas por Dia</label>
-                        <input type="number" step="0.1" id="appliance-hours" class="input" placeholder="Ex: 8" required />
+                        <input type="number" step="0.1" id="appliance-hours" class="input" placeholder="Ex: 8" />
                     </div>
 
                     <div class="form-group">
                         <label class="label">Dias por Mês</label>
-                        <input type="number" id="appliance-days" class="input" placeholder="Ex: 30" required />
+                        <input type="number" id="appliance-days" class="input" placeholder="Ex: 30" />
                     </div>
 
                     <div class="flex-buttons">
-                        <button id="submit-btn" class="btn btn-primary flex-1">
-                            Adicionar
+                        <button class="btn btn-primary flex-1" onclick="saveAppliance()">
+                            <span id="save-text">Adicionar</span>
                         </button>
-                        <button id="cancel-btn" class="btn btn-secondary">
+                        <button class="btn btn-secondary" onclick="cancelForm()">
                             Cancelar
                         </button>
                     </div>
@@ -551,7 +523,7 @@
             <!-- Lista de aparelhos -->
             <div class="card">
                 <h2 class="section-title">
-                    <svg class="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2z"></path>
                     </svg>
                     Seus Aparelhos
@@ -559,7 +531,7 @@
 
                 <!-- Estado vazio -->
                 <div id="empty-state" class="empty-state">
-                    <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 4rem; height: 4rem; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
                     <p>Nenhum aparelho adicionado ainda</p>
@@ -569,7 +541,7 @@
                 <!-- Lista de aparelhos -->
                 <div id="appliances-list" class="hidden">
                     <div class="appliances-container" id="appliances-container">
-                        <!-- Aparelhos serão adicionados aqui dinamicamente -->
+                        <!-- Aparelhos aparecerão aqui -->
                     </div>
 
                     <!-- Totais -->
@@ -673,208 +645,191 @@
     </div>
 
     <script>
-        // Estado da aplicação
-        let appliances = [];
-        let editingId = null;
+        var appliances = [];
+        var editingId = null;
 
-        // Aparelhos comuns
-        const commonAppliances = [
-            { name: 'Geladeira', power: 350 },
-            { name: 'Ar Condicionado', power: 1500 },
-            { name: 'Chuveiro Elétrico', power: 5500 },
-            { name: 'Micro-ondas', power: 1200 },
-            { name: 'Televisão LED 40"', power: 150 },
-            { name: 'Máquina de Lavar', power: 500 }
-        ];
-
-        // Elementos DOM
-        const elements = {
-            addBtn: document.getElementById('add-btn'),
-            form: document.getElementById('appliance-form'),
-            formTitle: document.getElementById('form-title'),
-            submitBtn: document.getElementById('submit-btn'),
-            cancelBtn: document.getElementById('cancel-btn'),
-            nameInput: document.getElementById('appliance-name'),
-            powerInput: document.getElementById('appliance-power'),
-            hoursInput: document.getElementById('appliance-hours'),
-            daysInput: document.getElementById('appliance-days'),
-            electricityRate: document.getElementById('electricity-rate'),
-            emptyState: document.getElementById('empty-state'),
-            appliancesList: document.getElementById('appliances-list'),
-            appliancesContainer: document.getElementById('appliances-container'),
-            totalConsumption: document.getElementById('total-consumption'),
-            totalCost: document.getElementById('total-cost'),
-            annualCost: document.getElementById('annual-cost'),
-            commonAppliancesContainer: document.getElementById('common-appliances')
-        };
-
-        // Inicializar aplicação
-        function init() {
-            renderCommonAppliances();
-            bindEvents();
-            updateTotals();
+        function toggleForm() {
+            var form = document.getElementById('appliance-form');
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                form.classList.add('fade-in');
+                document.getElementById('btn-text').textContent = 'Cancelar';
+            } else {
+                form.classList.add('hidden');
+                document.getElementById('btn-text').textContent = 'Adicionar';
+                clearForm();
+            }
         }
 
-        // Renderizar aparelhos comuns
-        function renderCommonAppliances() {
-            elements.commonAppliancesContainer.innerHTML = commonAppliances
-                .map((appliance, index) => `
-                    <button
-                        type="button"
-                        onclick="selectCommonAppliance(${index})"
-                        class="btn btn-small"
-                    >
-                        ${appliance.name} (${appliance.power}W)
-                    </button>
-                `).join('');
-        }
-
-        // Selecionar aparelho comum
-        function selectCommonAppliance(index) {
-            const appliance = commonAppliances[index];
-            elements.nameInput.value = appliance.name;
-            elements.powerInput.value = appliance.power;
-        }
-
-        // Vincular eventos
-        function bindEvents() {
-            elements.addBtn.addEventListener('click', showForm);
-            elements.cancelBtn.addEventListener('click', hideForm);
-            elements.submitBtn.addEventListener('click', handleSubmit);
-            elements.electricityRate.addEventListener('input', updateTotals);
-        }
-
-        // Mostrar formulário
-        function showForm() {
-            elements.addBtn.style.display = 'none';
-            elements.form.classList.remove('hidden');
-            elements.form.classList.add('fade-in');
-        }
-
-        // Esconder formulário
-        function hideForm() {
-            elements.addBtn.style.display = 'inline-flex';
-            elements.form.classList.add('hidden');
+        function cancelForm() {
+            var form = document.getElementById('appliance-form');
+            form.classList.add('hidden');
+            document.getElementById('btn-text').textContent = 'Adicionar';
             clearForm();
             editingId = null;
-            elements.formTitle.textContent = 'Adicionar Aparelho';
-            elements.submitBtn.textContent = 'Adicionar';
         }
 
-        // Limpar formulário
         function clearForm() {
-            elements.nameInput.value = '';
-            elements.powerInput.value = '';
-            elements.hoursInput.value = '';
-            elements.daysInput.value = '';
+            document.getElementById('appliance-name').value = '';
+            document.getElementById('appliance-power').value = '';
+            document.getElementById('appliance-hours').value = '';
+            document.getElementById('appliance-days').value = '';
+            document.getElementById('form-title').textContent = 'Adicionar Aparelho';
+            document.getElementById('save-text').textContent = 'Adicionar';
         }
 
-        // Validar formulário
-        function validateForm() {
-            const name = elements.nameInput.value.trim();
-            const power = parseFloat(elements.powerInput.value);
-            const hours = parseFloat(elements.hoursInput.value);
-            const days = parseFloat(elements.daysInput.value);
+        function selectAppliance(name, power) {
+            document.getElementById('appliance-name').value = name;
+            document.getElementById('appliance-power').value = power;
+        }
+
+        function saveAppliance() {
+            var name = document.getElementById('appliance-name').value.trim();
+            var power = parseFloat(document.getElementById('appliance-power').value);
+            var hours = parseFloat(document.getElementById('appliance-hours').value);
+            var days = parseFloat(document.getElementById('appliance-days').value);
 
             if (!name || !power || !hours || !days) {
                 alert('Por favor, preencha todos os campos');
-                return false;
+                return;
             }
 
             if (power <= 0 || hours <= 0 || days <= 0) {
                 alert('Os valores devem ser maiores que zero');
-                return false;
+                return;
             }
 
-            return { name, power, hours, days };
-        }
-
-        // Submeter formulário
-        function handleSubmit() {
-            const data = validateForm();
-            if (!data) return;
-
-            const appliance = {
+            var appliance = {
                 id: editingId || Date.now(),
-                name: data.name,
-                power: data.power,
-                hoursPerDay: data.hours,
-                daysPerMonth: data.days
+                name: name,
+                power: power,
+                hoursPerDay: hours,
+                daysPerMonth: days
             };
 
             if (editingId) {
-                const index = appliances.findIndex(app => app.id === editingId);
-                appliances[index] = appliance;
+                for (var i = 0; i < appliances.length; i++) {
+                    if (appliances[i].id === editingId) {
+                        appliances[i] = appliance;
+                        break;
+                    }
+                }
             } else {
                 appliances.push(appliance);
             }
 
-            hideForm();
+            cancelForm();
             renderAppliances();
             updateTotals();
         }
 
-        // Editar aparelho
         function editAppliance(id) {
-            const appliance = appliances.find(app => app.id === id);
+            var appliance = null;
+            for (var i = 0; i < appliances.length; i++) {
+                if (appliances[i].id === id) {
+                    appliance = appliances[i];
+                    break;
+                }
+            }
+
             if (!appliance) return;
 
             editingId = id;
-            elements.nameInput.value = appliance.name;
-            elements.powerInput.value = appliance.power;
-            elements.hoursInput.value = appliance.hoursPerDay;
-            elements.daysInput.value = appliance.daysPerMonth;
+            document.getElementById('appliance-name').value = appliance.name;
+            document.getElementById('appliance-power').value = appliance.power;
+            document.getElementById('appliance-hours').value = appliance.hoursPerDay;
+            document.getElementById('appliance-days').value = appliance.daysPerMonth;
             
-            elements.formTitle.textContent = 'Editar Aparelho';
-            elements.submitBtn.textContent = 'Atualizar';
-            showForm();
+            document.getElementById('form-title').textContent = 'Editar Aparelho';
+            document.getElementById('save-text').textContent = 'Atualizar';
+            document.getElementById('btn-text').textContent = 'Cancelar';
+            
+            var form = document.getElementById('appliance-form');
+            form.classList.remove('hidden');
+            form.classList.add('fade-in');
         }
 
-        // Excluir aparelho
         function deleteAppliance(id) {
             if (confirm('Tem certeza que deseja excluir este aparelho?')) {
-                appliances = appliances.filter(app => app.id !== id);
+                appliances = appliances.filter(function(app) {
+                    return app.id !== id;
+                });
                 renderAppliances();
                 updateTotals();
             }
         }
 
-        // Calcular consumo
         function calculateConsumption(appliance) {
             return (appliance.power * appliance.hoursPerDay * appliance.daysPerMonth) / 1000;
         }
 
-        // Calcular custo
         function calculateCost(appliance) {
-            const rate = parseFloat(elements.electricityRate.value) || 0;
+            var rate = parseFloat(document.getElementById('electricity-rate').value) || 0;
             return calculateConsumption(appliance) * rate;
         }
 
-        // Renderizar aparelhos
         function renderAppliances() {
+            var emptyState = document.getElementById('empty-state');
+            var appliancesList = document.getElementById('appliances-list');
+            var container = document.getElementById('appliances-container');
+
             if (appliances.length === 0) {
-                elements.emptyState.style.display = 'block';
-                elements.appliancesList.style.display = 'none';
+                emptyState.style.display = 'block';
+                appliancesList.classList.add('hidden');
                 return;
             }
 
-            elements.emptyState.style.display = 'none';
-            elements.appliancesList.style.display = 'block';
+            emptyState.style.display = 'none';
+            appliancesList.classList.remove('hidden');
 
-            elements.appliancesContainer.innerHTML = appliances.map(appliance => {
-                const consumption = calculateConsumption(appliance);
-                const cost = calculateCost(appliance);
+            var html = '';
+            for (var i = 0; i < appliances.length; i++) {
+                var app = appliances[i];
+                var consumption = calculateConsumption(app);
+                var cost = calculateCost(app);
 
-                return `
-                    <div class="appliance-item fade-in">
-                        <div class="appliance-header">
-                            <h3 class="appliance-name">${appliance.name}</h3>
-                            <div class="appliance-actions">
-                                <button onclick="editAppliance(${appliance.id})" class="btn-icon btn-edit">
-                                    <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button onclick="deleteAppliance(${appliance.id})" class="btn-icon btn-delete">
-                                    <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2
+                html += '<div class="appliance-item">';
+                html += '  <div class="appliance-header">';
+                html += '    <h3 class="appliance-name">' + app.name + '</h3>';
+                html += '    <div class="appliance-actions">';
+                html += '      <button onclick="editAppliance(' + app.id + ')" class="btn-icon btn-edit">✏️</button>';
+                html += '      <button onclick="deleteAppliance(' + app.id + ')" class="btn-icon btn-delete">🗑️</button>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '  <div class="appliance-details">';
+                html += '    <div>Potência: ' + app.power + 'W</div>';
+                html += '    <div>Uso: ' + app.hoursPerDay + 'h/dia</div>';
+                html += '    <div>Frequência: ' + app.daysPerMonth + ' dias/mês</div>';
+                html += '  </div>';
+                html += '  <div class="appliance-results">';
+                html += '    <div class="result-item">';
+                html += '      <span class="result-label">Consumo mensal</span>';
+                html += '      <div class="result-value-blue">' + consumption.toFixed(2) + ' kWh</div>';
+                html += '    </div>';
+                html += '    <div class="result-item">';
+                html += '      <span class="result-label">Custo mensal</span>';
+                html += '      <div class="result-value-green">R$ ' + cost.toFixed(2) + '</div>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function updateTotals() {
+            var totalConsumption = 0;
+            var totalCost = 0;
+
+            for (var i = 0; i < appliances.length; i++) {
+                totalConsumption += calculateConsumption(appliances[i]);
+                totalCost += calculateCost(appliances[i]);
+            }
+
+            document.getElementById('total-consumption').textContent = totalConsumption.toFixed(2);
+            document.getElementById('total-cost').textContent = 'R$ ' + totalCost.toFixed(2);
+            document.getElementById('annual-cost').textContent = 'Custo Anual Estimado: R$ ' + (totalCost * 12).toFixed(2);
+        }
+    </script>
+</body>
+</html>
