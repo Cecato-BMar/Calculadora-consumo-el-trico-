@@ -1,411 +1,880 @@
-import React, { useState } from 'react';
-import { Trash2, Zap, Calculator, Plus, Edit3 } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Consumo Elétrico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const ElectricityCalculator = () => {
-  const [appliances, setAppliances] = useState([]);
-  const [electricityRate, setElectricityRate] = useState(0.75); // R$/kWh
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    power: '',
-    hoursPerDay: '',
-    daysPerMonth: ''
-  });
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+            padding: 1rem;
+            line-height: 1.5;
+        }
 
-  const commonAppliances = [
-    { name: 'Geladeira', power: 350 },
-    { name: 'Ar Condicionado', power: 1500 },
-    { name: 'Chuveiro Elétrico', power: 5500 },
-    { name: 'Micro-ondas', power: 1200 },
-    { name: 'Televisão LED 40"', power: 150 },
-    { name: 'Máquina de Lavar', power: 500 },
-    { name: 'Ferro de Passar', power: 1000 },
-    { name: 'Ventilador', power: 120 },
-    { name: 'Computador', power: 300 },
-    { name: 'Lâmpada LED', power: 10 }
-  ];
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-  const handleSubmit = () => {
-    
-    if (!formData.name || !formData.power || !formData.hoursPerDay || !formData.daysPerMonth) {
-      alert('Por favor, preencha todos os campos');
-      return;
-    }
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-    const newAppliance = {
-      id: editingId || Date.now(),
-      name: formData.name,
-      power: parseFloat(formData.power),
-      hoursPerDay: parseFloat(formData.hoursPerDay),
-      daysPerMonth: parseFloat(formData.daysPerMonth)
-    };
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
 
-    if (editingId) {
-      setAppliances(prev => prev.map(app => app.id === editingId ? newAppliance : app));
-    } else {
-      setAppliances(prev => [...prev, newAppliance]);
-    }
+        .header-title h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
 
-    resetForm();
-  };
+        .header-subtitle {
+            color: #6b7280;
+        }
 
-  const resetForm = () => {
-    setFormData({ name: '', power: '', hoursPerDay: '', daysPerMonth: '' });
-    setShowForm(false);
-    setEditingId(null);
-  };
+        .icon {
+            width: 2rem;
+            height: 2rem;
+            color: #2563eb;
+        }
 
-  const editAppliance = (appliance) => {
-    setFormData({
-      name: appliance.name,
-      power: appliance.power.toString(),
-      hoursPerDay: appliance.hoursPerDay.toString(),
-      daysPerMonth: appliance.daysPerMonth.toString()
-    });
-    setEditingId(appliance.id);
-    setShowForm(true);
-  };
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
 
-  const deleteAppliance = (id) => {
-    setAppliances(prev => prev.filter(app => app.id !== id));
-  };
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
 
-  const calculateConsumption = (appliance) => {
-    // Consumo em kWh por mês
-    return (appliance.power * appliance.hoursPerDay * appliance.daysPerMonth) / 1000;
-  };
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
 
-  const calculateCost = (appliance) => {
-    return calculateConsumption(appliance) * electricityRate;
-  };
+        @media (max-width: 1024px) {
+            .grid-lg-2 {
+                grid-template-columns: 1fr;
+            }
+        }
 
-  const totalConsumption = appliances.reduce((sum, app) => sum + calculateConsumption(app), 0);
-  const totalCost = appliances.reduce((sum, app) => sum + calculateCost(app), 0);
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
 
-  const selectCommonAppliance = (common) => {
-    setFormData(prev => ({
-      ...prev,
-      name: common.name,
-      power: common.power.toString()
-    }));
-  };
+        /* Form */
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        <header className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Zap className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-800">
-              Calculadora de Consumo Elétrico
-            </h1>
-          </div>
-          <p className="text-gray-600">
-            Calcule o consumo e gasto dos seus eletrodomésticos
-          </p>
+        .form-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-small {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #f3f4f6;
+            color: #374151;
+            text-align: left;
+        }
+
+        .btn-small:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Inputs */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Special sections */
+        .energy-rate {
+            background-color: #fefce8;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Common appliances grid */
+        .common-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Appliances list */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+
+        .appliances-container {
+            max-height: 24rem;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .appliance-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .appliance-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .appliance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .appliance-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .appliance-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.25rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            color: #2563eb;
+        }
+
+        .btn-edit:hover {
+            color: #1d4ed8;
+        }
+
+        .btn-delete {
+            color: #dc2626;
+        }
+
+        .btn-delete:hover {
+            color: #b91c1c;
+        }
+
+        .appliance-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .appliance-results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .result-item {
+            text-align: left;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: block;
+        }
+
+        .result-value-blue {
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        .result-value-green {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        /* Totals */
+        .totals {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1.5rem;
+        }
+
+        .totals h3 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .total-card {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .total-card-blue {
+            background-color: #eff6ff;
+        }
+
+        .total-card-green {
+            background-color: #ecfdf5;
+        }
+
+        .total-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .total-value-blue {
+            color: #2563eb;
+        }
+
+        .total-value-green {
+            color: #059669;
+        }
+
+        .total-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .annual-cost {
+            text-align: center;
+            padding: 0.75rem;
+            background-color: #fefce8;
+            border-radius: 0.5rem;
+        }
+
+        .annual-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #a16207;
+        }
+
+        /* How to use section */
+        .howto-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .step-number {
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: #2563eb;
+            color: white;
+            font-size: 0.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        .step-content strong {
+            color: #1f2937;
+        }
+
+        .step-content span {
+            color: #6b7280;
+        }
+
+        .tip-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #eff6ff;
+            border-radius: 0.5rem;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-text {
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+
+        /* Tips section */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .flex-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        /* Icons */
+        .icon-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .icon-md {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <h1>Calculadora de Consumo Elétrico</h1>
+            </div>
+            <p class="header-subtitle">
+                Calcule o consumo e gasto dos seus eletrodomésticos
+            </p>
         </header>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Formulário */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {editingId ? 'Editar Aparelho' : 'Adicionar Aparelho'}
-              </h2>
-              {!showForm && (
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Adicionar
-                </button>
-              )}
+        <div class="grid grid-lg-2">
+            <!-- Formulário -->
+            <div class="card">
+                <div class="form-header">
+                    <h2 class="form-title" id="form-title">
+                        Adicionar Aparelho
+                    </h2>
+                    <button id="add-btn" class="btn btn-primary">
+                        <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Adicionar
+                    </button>
+                </div>
+
+                <!-- Tarifa de energia -->
+                <div class="energy-rate">
+                    <label class="label">
+                        Tarifa de Energia Elétrica (R$/kWh)
+                    </label>
+                    <input type="number" step="0.01" id="electricity-rate" value="0.75" class="input" />
+                </div>
+
+                <!-- Formulário -->
+                <div id="appliance-form" class="hidden fade-in">
+                    <!-- Aparelhos comuns -->
+                    <div class="form-group">
+                        <label class="label">
+                            Aparelhos Comuns (clique para usar)
+                        </label>
+                        <div class="common-grid" id="common-appliances">
+                            <!-- Preenchido dinamicamente -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Nome do Aparelho</label>
+                        <input type="text" id="appliance-name" class="input" placeholder="Ex: Geladeira" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Potência (Watts)</label>
+                        <input type="number" id="appliance-power" class="input" placeholder="Ex: 350" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Horas por Dia</label>
+                        <input type="number" step="0.1" id="appliance-hours" class="input" placeholder="Ex: 8" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Dias por Mês</label>
+                        <input type="number" id="appliance-days" class="input" placeholder="Ex: 30" required />
+                    </div>
+
+                    <div class="flex-buttons">
+                        <button id="submit-btn" class="btn btn-primary flex-1">
+                            Adicionar
+                        </button>
+                        <button id="cancel-btn" class="btn btn-secondary">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {/* Tarifa de energia */}
-            <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tarifa de Energia Elétrica (R$/kWh)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={electricityRate}
-                onChange={(e) => setElectricityRate(parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <!-- Lista de aparelhos -->
+            <div class="card">
+                <h2 class="section-title">
+                    <svg class="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2z"></path>
+                    </svg>
+                    Seus Aparelhos
+                </h2>
+
+                <!-- Estado vazio -->
+                <div id="empty-state" class="empty-state">
+                    <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <p>Nenhum aparelho adicionado ainda</p>
+                    <p style="font-size: 0.875rem;">Clique em "Adicionar" para começar</p>
+                </div>
+
+                <!-- Lista de aparelhos -->
+                <div id="appliances-list" class="hidden">
+                    <div class="appliances-container" id="appliances-container">
+                        <!-- Aparelhos serão adicionados aqui dinamicamente -->
+                    </div>
+
+                    <!-- Totais -->
+                    <div class="totals">
+                        <h3>Resumo Mensal</h3>
+                        <div class="totals-grid">
+                            <div class="total-card total-card-blue">
+                                <div class="total-value total-value-blue" id="total-consumption">
+                                    0.00
+                                </div>
+                                <div class="total-label">kWh Total</div>
+                            </div>
+                            <div class="total-card total-card-green">
+                                <div class="total-value total-value-green" id="total-cost">
+                                    R$ 0.00
+                                </div>
+                                <div class="total-label">Custo Total</div>
+                            </div>
+                        </div>
+                        <div class="annual-cost">
+                            <div class="annual-value" id="annual-cost">
+                                Custo Anual Estimado: R$ 0.00
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {showForm && (
-              <div className="space-y-4">
-                {/* Aparelhos comuns */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Aparelhos Comuns (clique para usar)
-                  </label>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    {commonAppliances.slice(0, 6).map((common, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => selectCommonAppliance(common)}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded transition-colors text-left"
-                      >
-                        {common.name} ({common.power}W)
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome do Aparelho
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ex: Geladeira"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Potência (Watts)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.power}
-                    onChange={(e) => setFormData(prev => ({...prev, power: e.target.value}))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ex: 350"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Horas por Dia
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={formData.hoursPerDay}
-                    onChange={(e) => setFormData(prev => ({...prev, hoursPerDay: e.target.value}))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ex: 8"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dias por Mês
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.daysPerMonth}
-                    onChange={(e) => setFormData(prev => ({...prev, daysPerMonth: e.target.value}))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ex: 30"
-                    required
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
-                  >
-                    {editingId ? 'Atualizar' : 'Adicionar'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-6 bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Lista de aparelhos e cálculos */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-              <Calculator className="w-5 h-5" />
-              Seus Aparelhos
-            </h2>
-
-            {appliances.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <Zap className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>Nenhum aparelho adicionado ainda</p>
-                <p className="text-sm">Clique em "Adicionar" para começar</p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                  {appliances.map((appliance) => (
-                    <div key={appliance.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-800">{appliance.name}</h3>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => editAppliance(appliance)}
-                            className="text-blue-600 hover:text-blue-800 p-1"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => deleteAppliance(appliance.id)}
-                            className="text-red-600 hover:text-red-800 p-1"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                        <div>Potência: {appliance.power}W</div>
-                        <div>Uso: {appliance.hoursPerDay}h/dia</div>
-                        <div>Frequência: {appliance.daysPerMonth} dias/mês</div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 pt-3 border-t">
-                        <div>
-                          <span className="text-xs text-gray-500">Consumo mensal</span>
-                          <div className="font-semibold text-blue-600">
-                            {calculateConsumption(appliance).toFixed(2)} kWh
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-xs text-gray-500">Custo mensal</span>
-                          <div className="font-semibold text-green-600">
-                            R$ {calculateCost(appliance).toFixed(2)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Totais */}
-                <div className="border-t pt-6">
-                  <h3 className="font-semibold text-gray-800 mb-4">Resumo Mensal</h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {totalConsumption.toFixed(2)}
-                      </div>
-                      <div className="text-sm text-gray-600">kWh Total</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
-                        R$ {totalCost.toFixed(2)}
-                      </div>
-                      <div className="text-sm text-gray-600">Custo Total</div>
-                    </div>
-                  </div>
-                  <div className="mt-4 text-center p-3 bg-yellow-50 rounded-lg">
-                    <div className="text-lg font-semibold text-yellow-700">
-                      Custo Anual Estimado: R$ {(totalCost * 12).toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
         </div>
 
-        {/* Como Usar */}
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">📋 Como Usar</h3>
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                1
-              </div>
-              <div>
-                <strong className="text-gray-800">Configure a tarifa de energia:</strong>
-                <span className="text-gray-600"> Ajuste o valor em R$/kWh conforme sua conta de luz (geralmente entre R$ 0,60 e R$ 1,00).</span>
-              </div>
+        <!-- Como Usar -->
+        <div class="card">
+            <h3 class="section-title">📋 Como Usar</h3>
+            <div class="howto-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>Configure a tarifa de energia:</strong>
+                        <span> Ajuste o valor em R$/kWh conforme sua conta de luz (geralmente entre R$ 0,60 e R$ 1,00).</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Adicione seus aparelhos:</strong>
+                        <span> Use os botões de aparelhos comuns ou crie personalizados clicando em "Adicionar".</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <strong>Preencha as informações:</strong>
+                        <span> Nome, potência (watts), horas por dia de uso e quantos dias por mês o aparelho funciona.</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <strong>Visualize os resultados:</strong>
+                        <span> Veja automaticamente o consumo em kWh e o custo mensal de cada aparelho.</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <strong>Gerencie sua lista:</strong>
+                        <span> Edite ou exclua aparelhos usando os ícones ao lado direito de cada item.</span>
+                    </div>
+                </div>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                2
-              </div>
-              <div>
-                <strong className="text-gray-800">Adicione seus aparelhos:</strong>
-                <span className="text-gray-600"> Use os botões de aparelhos comuns ou crie personalizados clicando em "Adicionar".</span>
-              </div>
+            <div class="tip-box">
+                <h4 class="tip-title">🔍 Onde encontrar a potência do aparelho?</h4>
+                <p class="tip-text">
+                    Procure por uma etiqueta ou placa no aparelho com informações técnicas. A potência geralmente está indicada em "W" (watts) ou "kW" (quilowatts). Se estiver em kW, multiplique por 1000 para converter para watts.
+                </p>
             </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                3
-              </div>
-              <div>
-                <strong className="text-gray-800">Preencha as informações:</strong>
-                <span className="text-gray-600"> Nome, potência (watts), horas por dia de uso e quantos dias por mês o aparelho funciona.</span>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                4
-              </div>
-              <div>
-                <strong className="text-gray-800">Visualize os resultados:</strong>
-                <span className="text-gray-600"> Veja automaticamente o consumo em kWh e o custo mensal de cada aparelho.</span>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                5
-              </div>
-              <div>
-                <strong className="text-gray-800">Gerencie sua lista:</strong>
-                <span className="text-gray-600"> Edite ou exclua aparelhos usando os ícones ao lado direito de cada item.</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">🔍 Onde encontrar a potência do aparelho?</h4>
-            <p className="text-sm text-blue-700">
-              Procure por uma etiqueta ou placa no aparelho com informações técnicas. A potência geralmente está indicada em "W" (watts) ou "kW" (quilowatts). Se estiver em kW, multiplique por 1000 para converter para watts.
-            </p>
-          </div>
         </div>
 
-        {/* Dicas */}
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">💡 Dicas para Economizar</h3>
-          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
-            <div>
-              <strong>Chuveiro Elétrico:</strong> Reduza o tempo de banho e use na posição "verão" quando possível.
+        <!-- Dicas -->
+        <div class="card">
+            <h3 class="section-title">💡 Dicas para Economizar</h3>
+            <div class="tips-grid">
+                <div>
+                    <strong>Chuveiro Elétrico:</strong> Reduza o tempo de banho e use na posição "verão" quando possível.
+                </div>
+                <div>
+                    <strong>Ar Condicionado:</strong> Mantenha entre 22-24°C e limpe os filtros regularmente.
+                </div>
+                <div>
+                    <strong>Geladeira:</strong> Não abra desnecessariamente e mantenha a temperatura adequada.
+                </div>
+                <div>
+                    <strong>Iluminação:</strong> Troque por lâmpadas LED e aproveite a luz natural.
+                </div>
             </div>
-            <div>
-              <strong>Ar Condicionado:</strong> Mantenha entre 22-24°C e limpe os filtros regularmente.
-            </div>
-            <div>
-              <strong>Geladeira:</strong> Não abra desnecessariamente e mantenha a temperatura adequada.
-            </div>
-            <div>
-              <strong>Iluminação:</strong> Troque por lâmpadas LED e aproveite a luz natural.
-            </div>
-          </div>
         </div>
-      </div>
     </div>
-  );
-};
 
-export default ElectricityCalculator;
+    <script>
+        // Estado da aplicação
+        let appliances = [];
+        let editingId = null;
+
+        // Aparelhos comuns
+        const commonAppliances = [
+            { name: 'Geladeira', power: 350 },
+            { name: 'Ar Condicionado', power: 1500 },
+            { name: 'Chuveiro Elétrico', power: 5500 },
+            { name: 'Micro-ondas', power: 1200 },
+            { name: 'Televisão LED 40"', power: 150 },
+            { name: 'Máquina de Lavar', power: 500 }
+        ];
+
+        // Elementos DOM
+        const elements = {
+            addBtn: document.getElementById('add-btn'),
+            form: document.getElementById('appliance-form'),
+            formTitle: document.getElementById('form-title'),
+            submitBtn: document.getElementById('submit-btn'),
+            cancelBtn: document.getElementById('cancel-btn'),
+            nameInput: document.getElementById('appliance-name'),
+            powerInput: document.getElementById('appliance-power'),
+            hoursInput: document.getElementById('appliance-hours'),
+            daysInput: document.getElementById('appliance-days'),
+            electricityRate: document.getElementById('electricity-rate'),
+            emptyState: document.getElementById('empty-state'),
+            appliancesList: document.getElementById('appliances-list'),
+            appliancesContainer: document.getElementById('appliances-container'),
+            totalConsumption: document.getElementById('total-consumption'),
+            totalCost: document.getElementById('total-cost'),
+            annualCost: document.getElementById('annual-cost'),
+            commonAppliancesContainer: document.getElementById('common-appliances')
+        };
+
+        // Inicializar aplicação
+        function init() {
+            renderCommonAppliances();
+            bindEvents();
+            updateTotals();
+        }
+
+        // Renderizar aparelhos comuns
+        function renderCommonAppliances() {
+            elements.commonAppliancesContainer.innerHTML = commonAppliances
+                .map((appliance, index) => `
+                    <button
+                        type="button"
+                        onclick="selectCommonAppliance(${index})"
+                        class="btn btn-small"
+                    >
+                        ${appliance.name} (${appliance.power}W)
+                    </button>
+                `).join('');
+        }
+
+        // Selecionar aparelho comum
+        function selectCommonAppliance(index) {
+            const appliance = commonAppliances[index];
+            elements.nameInput.value = appliance.name;
+            elements.powerInput.value = appliance.power;
+        }
+
+        // Vincular eventos
+        function bindEvents() {
+            elements.addBtn.addEventListener('click', showForm);
+            elements.cancelBtn.addEventListener('click', hideForm);
+            elements.submitBtn.addEventListener('click', handleSubmit);
+            elements.electricityRate.addEventListener('input', updateTotals);
+        }
+
+        // Mostrar formulário
+        function showForm() {
+            elements.addBtn.style.display = 'none';
+            elements.form.classList.remove('hidden');
+            elements.form.classList.add('fade-in');
+        }
+
+        // Esconder formulário
+        function hideForm() {
+            elements.addBtn.style.display = 'inline-flex';
+            elements.form.classList.add('hidden');
+            clearForm();
+            editingId = null;
+            elements.formTitle.textContent = 'Adicionar Aparelho';
+            elements.submitBtn.textContent = 'Adicionar';
+        }
+
+        // Limpar formulário
+        function clearForm() {
+            elements.nameInput.value = '';
+            elements.powerInput.value = '';
+            elements.hoursInput.value = '';
+            elements.daysInput.value = '';
+        }
+
+        // Validar formulário
+        function validateForm() {
+            const name = elements.nameInput.value.trim();
+            const power = parseFloat(elements.powerInput.value);
+            const hours = parseFloat(elements.hoursInput.value);
+            const days = parseFloat(elements.daysInput.value);
+
+            if (!name || !power || !hours || !days) {
+                alert('Por favor, preencha todos os campos');
+                return false;
+            }
+
+            if (power <= 0 || hours <= 0 || days <= 0) {
+                alert('Os valores devem ser maiores que zero');
+                return false;
+            }
+
+            return { name, power, hours, days };
+        }
+
+        // Submeter formulário
+        function handleSubmit() {
+            const data = validateForm();
+            if (!data) return;
+
+            const appliance = {
+                id: editingId || Date.now(),
+                name: data.name,
+                power: data.power,
+                hoursPerDay: data.hours,
+                daysPerMonth: data.days
+            };
+
+            if (editingId) {
+                const index = appliances.findIndex(app => app.id === editingId);
+                appliances[index] = appliance;
+            } else {
+                appliances.push(appliance);
+            }
+
+            hideForm();
+            renderAppliances();
+            updateTotals();
+        }
+
+        // Editar aparelho
+        function editAppliance(id) {
+            const appliance = appliances.find(app => app.id === id);
+            if (!appliance) return;
+
+            editingId = id;
+            elements.nameInput.value = appliance.name;
+            elements.powerInput.value = appliance.power;
+            elements.hoursInput.value = appliance.hoursPerDay;
+            elements.daysInput.value = appliance.daysPerMonth;
+            
+            elements.formTitle.textContent = 'Editar Aparelho';
+            elements.submitBtn.textContent = 'Atualizar';
+            showForm();
+        }
+
+        // Excluir aparelho
+        function deleteAppliance(id) {
+            if (confirm('Tem certeza que deseja excluir este aparelho?')) {
+                appliances = appliances.filter(app => app.id !== id);
+                renderAppliances();
+                updateTotals();
+            }
+        }
+
+        // Calcular consumo
+        function calculateConsumption(appliance) {
+            return (appliance.power * appliance.hoursPerDay * appliance.daysPerMonth) / 1000;
+        }
+
+        // Calcular custo
+        function calculateCost(appliance) {
+            const rate = parseFloat(elements.electricityRate.value) || 0;
+            return calculateConsumption(appliance) * rate;
+        }
+
+        // Renderizar aparelhos
+        function renderAppliances() {
+            if (appliances.length === 0) {
+                elements.emptyState.style.display = 'block';
+                elements.appliancesList.style.display = 'none';
+                return;
+            }
+
+            elements.emptyState.style.display = 'none';
+            elements.appliancesList.style.display = 'block';
+
+            elements.appliancesContainer.innerHTML = appliances.map(appliance => {
+                const consumption = calculateConsumption(appliance);
+                const cost = calculateCost(appliance);
+
+                return `
+                    <div class="appliance-item fade-in">
+                        <div class="appliance-header">
+                            <h3 class="appliance-name">${appliance.name}</h3>
+                            <div class="appliance-actions">
+                                <button onclick="editAppliance(${appliance.id})" class="btn-icon btn-edit">
+                                    <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteAppliance(${appliance.id})" class="btn-icon btn-delete">
+                                    <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2
