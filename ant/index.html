@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Consumo Elétrico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+            padding: 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .header-subtitle {
+            color: #6b7280;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-small {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #f3f4f6;
+            color: #374151;
+            text-align: left;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-small:hover {
+            background-color: #e5e7eb;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .energy-rate {
+            background-color: #fefce8;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .common-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+            color: #6b7280;
+        }
+
+        .appliances-container {
+            max-height: 24rem;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .appliance-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .appliance-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .appliance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .appliance-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .appliance-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.25rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 0.25rem;
+        }
+
+        .btn-icon:hover {
+            background-color: #f3f4f6;
+        }
+
+        .btn-edit {
+            color: #2563eb;
+        }
+
+        .btn-delete {
+            color: #dc2626;
+        }
+
+        .appliance-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .appliance-results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .result-item {
+            text-align: left;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: block;
+        }
+
+        .result-value-blue {
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        .result-value-green {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .totals {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1.5rem;
+        }
+
+        .totals h3 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .total-card {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .total-card-blue {
+            background-color: #eff6ff;
+        }
+
+        .total-card-green {
+            background-color: #ecfdf5;
+        }
+
+        .total-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .total-value-blue {
+            color: #2563eb;
+        }
+
+        .total-value-green {
+            color: #059669;
+        }
+
+        .total-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .annual-cost {
+            text-align: center;
+            padding: 0.75rem;
+            background-color: #fefce8;
+            border-radius: 0.5rem;
+        }
+
+        .annual-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #a16207;
+        }
+
+        .howto-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .step-number {
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: #2563eb;
+            color: white;
+            font-size: 0.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        .step-content strong {
+            color: #1f2937;
+        }
+
+        .step-content span {
+            color: #6b7280;
+        }
+
+        .tip-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #eff6ff;
+            border-radius: 0.5rem;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-text {
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .flex-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .appliance-details {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .totals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .common-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <svg style="width: 2rem; height: 2rem; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <h1>Calculadora de Consumo Elétrico</h1>
+            </div>
+            <p class="header-subtitle">
+                Calcule o consumo e gasto dos seus eletrodomésticos
+            </p>
+        </header>
+
+        <div class="grid">
+            <!-- Formulário -->
+            <div class="card">
+                <div class="form-header">
+                    <h2 class="form-title" id="form-title">
+                        Adicionar Aparelho
+                    </h2>
+                    <button class="btn btn-primary" onclick="toggleForm()">
+                        <span id="btn-text">Adicionar</span>
+                    </button>
+                </div>
+
+                <!-- Tarifa de energia -->
+                <div class="energy-rate">
+                    <label class="label">
+                        Tarifa de Energia Elétrica (R$/kWh)
+                    </label>
+                    <input type="number" step="0.01" id="electricity-rate" value="0.75" class="input" onchange="updateTotals()" />
+                </div>
+
+                <!-- Formulário -->
+                <div id="appliance-form" class="hidden">
+                    <!-- Aparelhos comuns -->
+                    <div class="form-group">
+                        <label class="label">
+                            Aparelhos Comuns (clique para usar)
+                        </label>
+                        <div class="common-grid">
+                            <button type="button" onclick="selectAppliance('Geladeira', 350)" class="btn btn-small">Geladeira (350W)</button>
+                            <button type="button" onclick="selectAppliance('Ar Condicionado', 1500)" class="btn btn-small">Ar Condicionado (1500W)</button>
+                            <button type="button" onclick="selectAppliance('Chuveiro Elétrico', 5500)" class="btn btn-small">Chuveiro Elétrico (5500W)</button>
+                            <button type="button" onclick="selectAppliance('Micro-ondas', 1200)" class="btn btn-small">Micro-ondas (1200W)</button>
+                            <button type="button" onclick="selectAppliance('Televisão LED 40', 150)" class="btn btn-small">TV LED 40" (150W)</button>
+                            <button type="button" onclick="selectAppliance('Máquina de Lavar', 500)" class="btn btn-small">Máquina de Lavar (500W)</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Nome do Aparelho</label>
+                        <input type="text" id="appliance-name" class="input" placeholder="Ex: Geladeira" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Potência (Watts)</label>
+                        <input type="number" id="appliance-power" class="input" placeholder="Ex: 350" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Horas por Dia</label>
+                        <input type="number" step="0.1" id="appliance-hours" class="input" placeholder="Ex: 8" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Dias por Mês</label>
+                        <input type="number" id="appliance-days" class="input" placeholder="Ex: 30" />
+                    </div>
+
+                    <div class="flex-buttons">
+                        <button class="btn btn-primary flex-1" onclick="saveAppliance()">
+                            <span id="save-text">Adicionar</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="cancelForm()">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de aparelhos -->
+            <div class="card">
+                <h2 class="section-title">
+                    <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 002 2z"></path>
+                    </svg>
+                    Seus Aparelhos
+                </h2>
+
+                <!-- Estado vazio -->
+                <div id="empty-state" class="empty-state">
+                    <svg style="width: 4rem; height: 4rem; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <p>Nenhum aparelho adicionado ainda</p>
+                    <p style="font-size: 0.875rem;">Clique em "Adicionar" para começar</p>
+                </div>
+
+                <!-- Lista de aparelhos -->
+                <div id="appliances-list" class="hidden">
+                    <div class="appliances-container" id="appliances-container">
+                        <!-- Aparelhos aparecerão aqui -->
+                    </div>
+
+                    <!-- Totais -->
+                    <div class="totals">
+                        <h3>Resumo Mensal</h3>
+                        <div class="totals-grid">
+                            <div class="total-card total-card-blue">
+                                <div class="total-value total-value-blue" id="total-consumption">
+                                    0.00
+                                </div>
+                                <div class="total-label">kWh Total</div>
+                            </div>
+                            <div class="total-card total-card-green">
+                                <div class="total-value total-value-green" id="total-cost">
+                                    R$ 0.00
+                                </div>
+                                <div class="total-label">Custo Total</div>
+                            </div>
+                        </div>
+                        <div class="annual-cost">
+                            <div class="annual-value" id="annual-cost">
+                                Custo Anual Estimado: R$ 0.00
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Como Usar -->
+        <div class="card">
+            <h3 class="section-title">📋 Como Usar</h3>
+            <div class="howto-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>Configure a tarifa de energia:</strong>
+                        <span> Ajuste o valor em R$/kWh conforme sua conta de luz (geralmente entre R$ 0,60 e R$ 1,00).</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Adicione seus aparelhos:</strong>
+                        <span> Use os botões de aparelhos comuns ou crie personalizados clicando em "Adicionar".</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <strong>Preencha as informações:</strong>
+                        <span> Nome, potência (watts), horas por dia de uso e quantos dias por mês o aparelho funciona.</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <strong>Visualize os resultados:</strong>
+                        <span> Veja automaticamente o consumo em kWh e o custo mensal de cada aparelho.</span>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <strong>Gerencie sua lista:</strong>
+                        <span> Edite ou exclua aparelhos usando os ícones ao lado direito de cada item.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tip-box">
+                <h4 class="tip-title">🔍 Onde encontrar a potência do aparelho?</h4>
+                <p class="tip-text">
+                    Procure por uma etiqueta ou placa no aparelho com informações técnicas. A potência geralmente está indicada em "W" (watts) ou "kW" (quilowatts). Se estiver em kW, multiplique por 1000 para converter para watts.
+                </p>
+            </div>
+        </div>
+
+        <!-- Dicas -->
+        <div class="card">
+            <h3 class="section-title">💡 Dicas para Economizar</h3>
+            <div class="tips-grid">
+                <div>
+                    <strong>Chuveiro Elétrico:</strong> Reduza o tempo de banho e use na posição "verão" quando possível.
+                </div>
+                <div>
+                    <strong>Ar Condicionado:</strong> Mantenha entre 22-24°C e limpe os filtros regularmente.
+                </div>
+                <div>
+                    <strong>Geladeira:</strong> Não abra desnecessariamente e mantenha a temperatura adequada.
+                </div>
+                <div>
+                    <strong>Iluminação:</strong> Troque por lâmpadas LED e aproveite a luz natural.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var appliances = [];
+        var editingId = null;
+
+        function toggleForm() {
+            var form = document.getElementById('appliance-form');
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                form.classList.add('fade-in');
+                document.getElementById('btn-text').textContent = 'Cancelar';
+            } else {
+                form.classList.add('hidden');
+                document.getElementById('btn-text').textContent = 'Adicionar';
+                clearForm();
+            }
+        }
+
+        function cancelForm() {
+            var form = document.getElementById('appliance-form');
+            form.classList.add('hidden');
+            document.getElementById('btn-text').textContent = 'Adicionar';
+            clearForm();
+            editingId = null;
+        }
+
+        function clearForm() {
+            document.getElementById('appliance-name').value = '';
+            document.getElementById('appliance-power').value = '';
+            document.getElementById('appliance-hours').value = '';
+            document.getElementById('appliance-days').value = '';
+            document.getElementById('form-title').textContent = 'Adicionar Aparelho';
+            document.getElementById('save-text').textContent = 'Adicionar';
+        }
+
+        function selectAppliance(name, power) {
+            document.getElementById('appliance-name').value = name;
+            document.getElementById('appliance-power').value = power;
+        }
+
+        function saveAppliance() {
+            var name = document.getElementById('appliance-name').value.trim();
+            var power = parseFloat(document.getElementById('appliance-power').value);
+            var hours = parseFloat(document.getElementById('appliance-hours').value);
+            var days = parseFloat(document.getElementById('appliance-days').value);
+
+            if (!name || !power || !hours || !days) {
+                alert('Por favor, preencha todos os campos');
+                return;
+            }
+
+            if (power <= 0 || hours <= 0 || days <= 0) {
+                alert('Os valores devem ser maiores que zero');
+                return;
+            }
+
+            var appliance = {
+                id: editingId || Date.now(),
+                name: name,
+                power: power,
+                hoursPerDay: hours,
+                daysPerMonth: days
+            };
+
+            if (editingId) {
+                for (var i = 0; i < appliances.length; i++) {
+                    if (appliances[i].id === editingId) {
+                        appliances[i] = appliance;
+                        break;
+                    }
+                }
+            } else {
+                appliances.push(appliance);
+            }
+
+            cancelForm();
+            renderAppliances();
+            updateTotals();
+        }
+
+        function editAppliance(id) {
+            var appliance = null;
+            for (var i = 0; i < appliances.length; i++) {
+                if (appliances[i].id === id) {
+                    appliance = appliances[i];
+                    break;
+                }
+            }
+
+            if (!appliance) return;
+
+            editingId = id;
+            document.getElementById('appliance-name').value = appliance.name;
+            document.getElementById('appliance-power').value = appliance.power;
+            document.getElementById('appliance-hours').value = appliance.hoursPerDay;
+            document.getElementById('appliance-days').value = appliance.daysPerMonth;
+            
+            document.getElementById('form-title').textContent = 'Editar Aparelho';
+            document.getElementById('save-text').textContent = 'Atualizar';
+            document.getElementById('btn-text').textContent = 'Cancelar';
+            
+            var form = document.getElementById('appliance-form');
+            form.classList.remove('hidden');
+            form.classList.add('fade-in');
+        }
+
+        function deleteAppliance(id) {
+            if (confirm('Tem certeza que deseja excluir este aparelho?')) {
+                appliances = appliances.filter(function(app) {
+                    return app.id !== id;
+                });
+                renderAppliances();
+                updateTotals();
+            }
+        }
+
+        function calculateConsumption(appliance) {
+            return (appliance.power * appliance.hoursPerDay * appliance.daysPerMonth) / 1000;
+        }
+
+        function calculateCost(appliance) {
+            var rate = parseFloat(document.getElementById('electricity-rate').value) || 0;
+            return calculateConsumption(appliance) * rate;
+        }
+
+        function renderAppliances() {
+            var emptyState = document.getElementById('empty-state');
+            var appliancesList = document.getElementById('appliances-list');
+            var container = document.getElementById('appliances-container');
+
+            if (appliances.length === 0) {
+                emptyState.style.display = 'block';
+                appliancesList.classList.add('hidden');
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            appliancesList.classList.remove('hidden');
+
+            var html = '';
+            for (var i = 0; i < appliances.length; i++) {
+                var app = appliances[i];
+                var consumption = calculateConsumption(app);
+                var cost = calculateCost(app);
+
+                html += '<div class="appliance-item">';
+                html += '  <div class="appliance-header">';
+                html += '    <h3 class="appliance-name">' + app.name + '</h3>';
+                html += '    <div class="appliance-actions">';
+                html += '      <button onclick="editAppliance(' + app.id + ')" class="btn-icon btn-edit">✏️</button>';
+                html += '      <button onclick="deleteAppliance(' + app.id + ')" class="btn-icon btn-delete">🗑️</button>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '  <div class="appliance-details">';
+                html += '    <div>Potência: ' + app.power + 'W</div>';
+                html += '    <div>Uso: ' + app.hoursPerDay + 'h/dia</div>';
+                html += '    <div>Frequência: ' + app.daysPerMonth + ' dias/mês</div>';
+                html += '  </div>';
+                html += '  <div class="appliance-results">';
+                html += '    <div class="result-item">';
+                html += '      <span class="result-label">Consumo mensal</span>';
+                html += '      <div class="result-value-blue">' + consumption.toFixed(2) + ' kWh</div>';
+                html += '    </div>';
+                html += '    <div class="result-item">';
+                html += '      <span class="result-label">Custo mensal</span>';
+                html += '      <div class="result-value-green">R$ ' + cost.toFixed(2) + '</div>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function updateTotals() {
+            var totalConsumption = 0;
+            var totalCost = 0;
+
+            for (var i = 0; i < appliances.length; i++) {
+                totalConsumption += calculateConsumption(appliances[i]);
+                totalCost += calculateCost(appliances[i]);
+            }
+
+            document.getElementById('total-consumption').textContent = totalConsumption.toFixed(2);
+            document.getElementById('total-cost').textContent = 'R$ ' + totalCost.toFixed(2);
+            document.getElementById('annual-cost').textContent = 'Custo Anual Estimado: R$ ' + (totalCost * 12).toFixed(2);
+        }
+    </script>
+</body>
+</html>
