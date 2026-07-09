@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Consumo Elétrico</title>
+
+<!-- Google Analytics (GA4) -->
+<!-- ⚠️ Substitua G-XXXXXXXXXX pelo seu ID de medição real -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TZTG9CKFCM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TZTG9CKFCM');
+</script>
 <style>
   :root{
     --bg-1:#0f172a;
@@ -678,11 +688,21 @@
 
     hideForm();
     renderList();
+
+    if(typeof gtag === 'function'){
+      gtag('event', editingId !== null ? 'edit_appliance' : 'add_appliance', {
+        appliance_name: name
+      });
+    }
   }
 
   function deleteAppliance(id){
     appliances = appliances.filter(function(a){ return a.id !== id; });
     renderList();
+
+    if(typeof gtag === 'function'){
+      gtag('event', 'delete_appliance');
+    }
   }
 
   function editAppliance(id){
